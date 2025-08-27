@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego de Señas</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-header {
+            margin-bottom: 30px;
+        }
+
+        .game-title {
+            color: #4a5568;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .score {
+            font-size: 1.2em;
+            color: #718096;
+            margin-bottom: 20px;
+        }
+
+        .question-section {
+            margin-bottom: 30px;
+        }
+
+        .question-text {
+            font-size: 1.5em;
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .sign-image {
+            width: 200px;
+            height: 200px;
+            background: #f7fafc;
+            border: 3px solid #e2e8f0;
+            border-radius: 15px;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4em;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            overflow: hidden;
+        }
+
+        .sign-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+        }
+
+        .sign-image:hover {
+            transform: scale(1.05);
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .option-btn {
+            padding: 15px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(145deg, #4299e1, #3182ce);
+            color: white;
+            box-shadow: 0 5px 15px rgba(66, 153, 225, 0.3);
+        }
+
+        .option-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(66, 153, 225, 0.4);
+        }
+
+        .option-btn:active {
+            transform: translateY(0);
+        }
+
+        .option-btn.correct {
+            background: linear-gradient(145deg, #48bb78, #38a169);
+            box-shadow: 0 5px 15px rgba(72, 187, 120, 0.3);
+        }
+
+        .option-btn.incorrect {
+            background: linear-gradient(145deg, #f56565, #e53e3e);
+            box-shadow: 0 5px 15px rgba(245, 101, 101, 0.3);
+        }
+
+        .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .feedback {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            transition: all 0.5s ease;
+        }
+
+        .feedback.correct {
+            background: #c6f6d5;
+            color: #22543d;
+            border: 2px solid #48bb78;
+        }
+
+        .feedback.incorrect {
+            background: #fed7d7;
+            color: #742a2a;
+            border: 2px solid #f56565;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .next-btn {
+            background: linear-gradient(145deg, #ed8936, #dd6b20);
+            color: white;
+            box-shadow: 0 5px 15px rgba(237, 137, 54, 0.3);
+        }
+
+        .restart-btn {
+            background: linear-gradient(145deg, #9f7aea, #805ad5);
+            color: white;
+            box-shadow: 0 5px 15px rgba(159, 122, 234, 0.3);
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4299e1, #3182ce);
+            transition: width 0.5s ease;
+            border-radius: 4px;
+        }
+
+        .confetti {
+            position: absolute;
+            top: -10px;
+            animation: confetti-fall 3s ease-in-out;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .pulse {
+            animation: pulse 0.6s ease-in-out;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .shake {
+            animation: shake 0.6s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">🤟 Juego de Señas 🤟</h1>
+            <div class="score">Puntuación: <span id="score">0</span> / <span id="total">0</span></div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+        </div>
+
+        <div class="question-section">
+            <div class="question-text" id="question">¡Presiona "Iniciar Juego" para comenzar!</div>
+            <div class="sign-image" id="signImage">🎮</div>
+        </div>
+
+        <div class="options" id="options" style="display: none;">
+            <button class="option-btn" onclick="selectAnswer(0)"></button>
+            <button class="option-btn" onclick="selectAnswer(1)"></button>
+            <button class="option-btn" onclick="selectAnswer(2)"></button>
+            <button class="option-btn" onclick="selectAnswer(3)"></button>
+        </div>
+
+        <div class="feedback" id="feedback" style="display: none;"></div>
+
+        <div class="control-buttons">
+            <button class="control-btn restart-btn" onclick="startGame()">Iniciar Juego</button>
+            <button class="control-btn next-btn" id="nextBtn" onclick="nextQuestion()" style="display: none;">Siguiente Pregunta</button>
+        </div>
+    </div>
+
+    <script>
+        // Base de datos de preguntas - AQUÍ PUEDES MODIFICAR LAS PREGUNTAS
+        const questions = [
+            // EJEMPLO DE ESTRUCTURA PARA TUS PREGUNTAS:
+            // { 
+            //     type: 'categoría', 
+            //     question: 'Tu pregunta aquí', 
+            //     sign: 'URL_de_tu_imagen.jpg', // Cambia esto por la URL de tu imagen
+            //     answer: 'Respuesta correcta', 
+            //     options: ['Opción 1', 'Opción 2', 'Opción 3', 'Opción 4'] 
+            // },
+
+            // Abecedario - REEMPLAZA ESTOS CON TUS IMÁGENES
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/a.png', answer: 'A', options: ['A', 'B', 'C', 'D'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/b.png', answer: 'B', options: ['A', 'B', 'C', 'D'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/c.png', answer: 'C', options: ['C', 'D', 'E', 'F'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/d.png', answer: 'D', options: ['C', 'D', 'E', 'F'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/e.png', answer: 'E', options: ['E', 'F', 'G', 'H'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/f.png', answer: 'F', options: ['E', 'F', 'G', 'H'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/g.png', answer: 'G', options: ['G', 'H', 'I', 'J'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/h.png', answer: 'H', options: ['G', 'H', 'I', 'J'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/i.png', answer: 'I', options: ['I', 'J', 'K', 'L'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/j.png', answer: 'J', options: ['I', 'J', 'K', 'L'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/k.png', answer: 'K', options: ['K', 'L', 'M', 'N'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/l.png', answer: 'L', options: ['K', 'L', 'M', 'N'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/m.png', answer: 'M', options: ['M', 'N', 'O', 'P'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/n.png', answer: 'N', options: ['M', 'N', 'O', 'P'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/o.png', answer: 'O', options: ['O', 'P', 'Q', 'R'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/p.png', answer: 'P', options: ['O', 'P', 'Q', 'R'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/q.png', answer: 'Q', options: ['Q', 'R', 'S', 'T'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/r.png', answer: 'R', options: ['Q', 'R', 'S', 'T'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/s.png', answer: 'S', options: ['S', 'T', 'U', 'V'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/t.png', answer: 'T', options: ['S', 'T', 'U', 'V'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/u.png', answer: 'U', options: ['U', 'V', 'W', 'X'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/v.png', answer: 'V', options: ['U', 'V', 'W', 'X'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/w.png', answer: 'W', options: ['W', 'X', 'Y', 'Z'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/x.png', answer: 'X', options: ['W', 'X', 'Y', 'Z'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/y.png', answer: 'Y', options: ['Y', 'Z', 'A', 'B'] },
+            { type: 'letra', question: '¿Qué letra es?', sign: 'imagenes/z.png', answer: 'Z', options: ['Y', 'Z', 'A', 'B'] },
+            
+            // Números - REEMPLAZA ESTOS CON TUS IMÁGENES
+            { type: 'número', question: '¿Qué número es?', sign: 'imagenes/1.png', answer: '1', options: ['1', '2', '3', '4'] },
+            { type: 'número', question: '¿Qué número es?', sign: 'imagenes/2.png', answer: '2', options: ['1', '2', '3', '4'] },
+            { type: 'número', question: '¿Qué número es?', sign: 'imagenes/3.png', answer: '3', options: ['3', '4', '5', '6'] },
+            { type: 'número', question: '¿Qué número es?', sign: 'imagenes/4.png', answer: '4', options: ['4', '5', '6', '7'] },
+            { type: 'número', question: '¿Qué número es?', sign: 'imagenes/5.png', answer: '5', options: ['5', '6', '7', '8'] },
+            { type: 'número', question: '¿Qué número es?', sign: 'imagenes/6.png', answer: '6', options: ['6', '7', '8', '9'] },
+            { type: 'número', question: '¿Qué número es?', sign: 'imagenes/7.png', answer: '7', options: ['7', '8', '9', '10'] },
+            { type: 'número', question: '¿Qué número es?', sign: 'imagenes/8.png', answer: '8', options: ['8', '9', '10', '11'] },
+            { type: 'número', question: '¿Qué número es?', sign: 'imagenes/9.png', answer: '9', options: ['9', '10', '11', '12'] },
+            { type: 'número', question: '¿Qué número es?', sign: 'imagenes/10.png', answer: '10', options: ['10', '11', '12', '13'] },
+            
+            // Días de la semana - REEMPLAZA ESTOS CON TUS IMÁGENES
+            { type: 'día', question: '¿Qué día es?', sign: 'imagenes/lunes.png', answer:'Lunes', options: ['Lunes', 'Martes', 'Miércoles', 'Jueves'] },
+            { type: 'día', question: '¿Qué día es?', sign: 'imagenes/martes.png', answer: 'Martes', options: ['Lunes', 'Martes', 'Miércoles', 'Jueves'] },
+            { type: 'día', question: '¿Qué día es?', sign: 'imagenes/miercoles.png', answer: 'Miércoles', options: ['Miércoles', 'Jueves', 'Viernes', 'Sábado'] },
+            { type: 'día', question: '¿Qué día es?', sign: 'imagenes/jueves.png', answer: 'Jueves', options: ['Jueves', 'Viernes', 'Sábado', 'Domingo'] },
+            { type: 'día', question: '¿Qué día es?', sign: 'imagenes/viernes.png', answer: 'Viernes', options: ['Viernes', 'Sábado', 'Domingo', 'Lunes'] },
+            { type: 'día', question: '¿Qué día es?', sign: 'imagenes/sabado.png', answer: 'Sábado', options: ['Sábado', 'Domingo', 'Lunes', 'Martes'] },
+            { type: 'día', question: '¿Qué día es?', sign: 'imagenes/domingo.png', answer: 'Domingo', options: ['Domingo', 'Lunes', 'Martes', 'Miércoles'] }
+           
+            // AGREGA MÁS PREGUNTAS AQUÍ SIGUIENDO EL MISMO FORMATO
+        ];
+
+        let currentQuestions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let gameStarted = false;
+        let answered = false;
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        function startGame() {
+            currentQuestions = shuffleArray(questions);
+            currentQuestionIndex = 0;
+            score = 0;
+            gameStarted = true;
+            answered = false;
+            
+            document.getElementById('score').textContent = score;
+            document.getElementById('total').textContent = currentQuestions.length;
+            document.getElementById('options').style.display = 'grid';
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            
+            showQuestion();
+        }
+
+        function showQuestion() {
+            if (currentQuestionIndex >= currentQuestions.length) {
+                endGame();
+                return;
+            }
+
+            const question = currentQuestions[currentQuestionIndex];
+            answered = false;
+            
+            document.getElementById('question').textContent = question.question;
+            
+            // Mostrar imagen o emoji
+                    const signImageContainer = document.getElementById('signImage');
+                if (question.sign.match(/\.(png|jpg|jpeg|gif)$/i) || question.sign.startsWith('http') || question.sign.startsWith('data:')) {
+            // Mostrar imagen
+            signImageContainer.innerHTML = `<img src="${question.sign}" alt="Seña" onerror="this.style.display='none'; this.parentElement.textContent='❓';">`;
+        } else {
+            // Mostrar texto o emoji
+            signImageContainer.textContent = question.sign;
+        }
+
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            
+            // Mezclar las opciones
+            const shuffledOptions = shuffleArray(question.options);
+            const optionButtons = document.querySelectorAll('.option-btn');
+            
+            optionButtons.forEach((btn, index) => {
+                btn.textContent = shuffledOptions[index];
+                btn.className = 'option-btn';
+                btn.disabled = false;
+            });
+
+            // Actualizar barra de progreso
+            const progress = ((currentQuestionIndex) / currentQuestions.length) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+
+        function selectAnswer(optionIndex) {
+            if (answered) return;
+            
+            answered = true;
+            const question = currentQuestions[currentQuestionIndex];
+            const selectedButton = document.querySelectorAll('.option-btn')[optionIndex];
+            const selectedAnswer = selectedButton.textContent;
+            const isCorrect = selectedAnswer === question.answer;
+            
+            const optionButtons = document.querySelectorAll('.option-btn');
+            optionButtons.forEach(btn => btn.disabled = true);
+
+            if (isCorrect) {
+                score++;
+                selectedButton.classList.add('correct');
+                showFeedback('¡Correcto! 🎉', 'correct');
+                document.getElementById('signImage').classList.add('pulse');
+                createConfetti();
+            } else {
+                selectedButton.classList.add('incorrect');
+                // Mostrar la respuesta correcta
+                optionButtons.forEach(btn => {
+                    if (btn.textContent === question.answer) {
+                        btn.classList.add('correct');
+                    }
+                });
+                showFeedback(`Incorrecto 😔 La respuesta correcta es: ${question.answer}`, 'incorrect');
+                document.getElementById('signImage').classList.add('shake');
+            }
+
+            document.getElementById('score').textContent = score;
+            document.getElementById('nextBtn').style.display = 'inline-block';
+
+            // Limpiar animaciones después de un tiempo
+            setTimeout(() => {
+                document.getElementById('signImage').classList.remove('pulse', 'shake');
+            }, 600);
+        }
+
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('feedback');
+            feedback.textContent = message;
+            feedback.className = `feedback ${type}`;
+            feedback.style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            showQuestion();
+        }
+
+        function endGame() {
+            const percentage = Math.round((score / currentQuestions.length) * 100);
+            let message = '';
+            
+            if (percentage >= 80) {
+                message = `¡Excelente trabajo! 🌟 Has completado el juego con ${score}/${currentQuestions.length} respuestas correctas (${percentage}%)`;
+            } else if (percentage >= 60) {
+                message = `¡Buen trabajo! 👍 Has completado el juego con ${score}/${currentQuestions.length} respuestas correctas (${percentage}%)`;
+            } else {
+                message = `¡Sigue practicando! 💪 Has completado el juego con ${score}/${currentQuestions.length} respuestas correctas (${percentage}%)`;
+            }
+            
+            document.getElementById('question').textContent = message;
+            document.getElementById('signImage').textContent = '🏆';
+            document.getElementById('options').style.display = 'none';
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            
+            // Actualizar barra de progreso al 100%
+            document.getElementById('progress').style.width = '100%';
+            
+            if (percentage >= 80) {
+                createConfetti();
+            }
+        }
+
+        function createConfetti() {
+            const colors = ['🎉', '🎊', '⭐', '🌟', '✨'];
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti');
+                    confetti.textContent = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.left = Math.random() * 100 + '%';
+                    confetti.style.fontSize = Math.random() * 20 + 20 + 'px';
+                    document.querySelector('.game-container').appendChild(confetti);
+                    
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 3000);
+                }, i * 100);
+            }
+        }
+    </script>
+</body>
+</html>
